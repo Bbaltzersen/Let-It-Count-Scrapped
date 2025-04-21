@@ -7,13 +7,17 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-  SafeAreaView, // Use SafeAreaView for screen content
+  SafeAreaView,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import Ionicons from '@expo/vector-icons/Ionicons'; // For dropdown icon
+import Ionicons from '@expo/vector-icons/Ionicons';
 
-// Adjust path based on your structure
-import { getAllEntries, Entry } from 'services/database';
+// Import shared type and utility function
+import { Entry } from 'types';
+import { calculateCalories } from 'utils/calorieUtils';
+// Import database functions
+import { getAllEntries } from 'services/database';
+
 
 // Interface for our grouped daily data
 interface DailyData {
@@ -22,52 +26,35 @@ interface DailyData {
   totalCalories: number;
 }
 
-// Helper function to calculate calories for a single entry (copied for now)
-// TODO: Consider moving this to a shared utility file
-const calculateCalories = (item: Entry): number => {
-  if (!item || typeof item.amount_in_g !== 'number' || typeof item.calories_per_100_g !== 'number') {
-    return 0;
-  }
-  return Math.round((item.amount_in_g / 100.0) * item.calories_per_100_g);
-};
-
 export default function HistoryScreen() {
   const { t } = useTranslation();
   const [dailyData, setDailyData] = useState<DailyData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [expandedDay, setExpandedDay] = useState<string | null>(null); // Store date string of expanded day
+  const [expandedDay, setExpandedDay] = useState<string | null>(null);
 
   // Function to group entries by day and calculate totals
+  // Use imported calculateCalories
   const processEntries = useCallback((allEntries: Entry[]): DailyData[] => {
-    if (!allEntries || allEntries.length === 0) {
-        return [];
-    }
-
+    if (!allEntries || allEntries.length === 0) return [];
     const grouped: { [date: string]: { entries: Entry[]; totalCalories: number } } = {};
-
     allEntries.forEach((entry) => {
       const entryDate = new Date(entry.createdAt);
-      // Format date as YYYY-MM-DD string for grouping key
       const dateString = entryDate.toISOString().split('T')[0];
-
       if (!grouped[dateString]) {
         grouped[dateString] = { entries: [], totalCalories: 0 };
       }
-
-      const calculatedEntryCalories = calculateCalories(entry);
+      const calculatedEntryCalories = calculateCalories(entry); // Use imported function
       grouped[dateString].entries.push(entry);
       grouped[dateString].totalCalories += calculatedEntryCalories;
     });
-
-    // Convert grouped object to sorted array
     return Object.keys(grouped)
-      .sort((a, b) => b.localeCompare(a)) // Sort dates descending (newest first)
+      .sort((a, b) => b.localeCompare(a))
       .map((date) => ({
         date: date,
-        entries: grouped[date].entries.sort((a,b)=> b.createdAt - a.createdAt), // Sort entries within day
+        entries: grouped[date].entries.sort((a,b)=> b.createdAt - a.createdAt),
         totalCalories: grouped[date].totalCalories,
       }));
-  }, []); // Add calculateCalories if it comes from props/context
+  }, []); // Dependency array is empty if calculateCalories is stable import
 
   // Fetch and process data on mount
   useEffect(() => {
@@ -79,7 +66,6 @@ export default function HistoryScreen() {
         setDailyData(processedData);
       } catch (error) {
         console.error("Failed to load history:", error);
-        // Consider showing an error message to the user
       } finally {
         setIsLoading(false);
       }
@@ -89,15 +75,13 @@ export default function HistoryScreen() {
 
   // Toggle expansion for a day
   const toggleDayExpansion = (date: string) => {
-    setExpandedDay((currentExpanded) =>
-      currentExpanded === date ? null : date // Toggle: close if already open, otherwise open this one
-    );
+    setExpandedDay((current) => (current === date ? null : date));
   };
 
   // Render item for the main list (each day)
   const renderDayItem = ({ item }: { item: DailyData }) => {
     const isExpanded = expandedDay === item.date;
-    const displayDate = new Date(item.date + 'T00:00:00'); // Ensure correct timezone handling for display if needed
+    const displayDate = new Date(item.date + 'T00:00:00');
 
     return (
       <View style={styles.dayContainer}>
@@ -107,7 +91,6 @@ export default function HistoryScreen() {
           activeOpacity={0.7}
         >
           <Text style={styles.dayDateText}>
-            {/* Basic date formatting, consider using a date library for better i18n later */}
             {displayDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </Text>
           <View style={styles.dayTotalRow}>
@@ -127,6 +110,7 @@ export default function HistoryScreen() {
               <View key={entry.id} style={styles.entryItem}>
                  <View style={styles.entryRow}>
                     <Text style={styles.entryName}>{entry.name}</Text>
+                    {/* Use imported calculateCalories function */}
                     <Text style={styles.entryCalculatedKcal}>~ {calculateCalories(entry)} kcal</Text>
                  </View>
                  <View style={styles.entryRow}>
@@ -162,98 +146,22 @@ export default function HistoryScreen() {
   );
 }
 
-// --- Styles ---
+// --- Styles --- (Keep existing styles)
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f0f0f0', // Slightly different background for history
-  },
-  centerStatus: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  listContentContainer: {
-      padding: 10,
-  },
-  dayContainer: {
-    backgroundColor: '#ffffff',
-    marginBottom: 10,
-    borderRadius: 8,
-    overflow: 'hidden', // Keep details contained
-    elevation: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.18,
-    shadowRadius: 1.00,
-  },
-  dayHeader: {
-    padding: 15,
-    backgroundColor: '#f9f9f9', // Header slightly different background
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-   dayTotalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  dayDateText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  dayTotalText: {
-    fontSize: 15,
-    color: '#555',
-  },
-  dayDetails: {
-    paddingHorizontal: 15,
-    paddingBottom: 5, // Add padding below last item
-    borderTopWidth: 1, // Separator line
-    borderTopColor: '#eee',
-  },
-  entryItem: {
-    // Using similar styles to index screen, maybe slightly less padding
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5', // Lighter separator
-  },
-  entryItemLast: { // Style to remove border on last item if needed
-     borderBottomWidth: 0,
-  },
-  entryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 3, // Smaller margin
-  },
-  entryName: {
-      fontWeight: 'bold',
-      fontSize: 15, // Slightly smaller
-      flex: 1,
-      marginRight: 10,
-      color: '#2c3e50',
-  },
-  entryCalculatedKcal: {
-      fontWeight: 'bold',
-      fontSize: 15, // Slightly smaller
-      color: '#e74c3c',
-  },
-  entryDetails: {
-      fontSize: 13, // Slightly smaller
-      color: '#7f8c8d',
-  },
-  entryTimestamp: {
-    fontSize: 11, // Slightly smaller
-    color: '#95a5a6',
-  },
-  emptyText: {
-      textAlign: 'center',
-      marginTop: 50,
-      fontSize: 16,
-      color: '#666',
-  }
+  safeArea: { flex: 1, backgroundColor: '#f0f0f0', },
+  centerStatus: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, },
+  listContentContainer: { padding: 10, },
+  dayContainer: { backgroundColor: '#ffffff', marginBottom: 10, borderRadius: 8, overflow: 'hidden', elevation: 1, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.18, shadowRadius: 1.00, },
+  dayHeader: { padding: 15, backgroundColor: '#f9f9f9', borderBottomWidth: 1, borderBottomColor: '#eee', },
+  dayTotalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, },
+  dayDateText: { fontSize: 16, fontWeight: 'bold', color: '#333', },
+  dayTotalText: { fontSize: 15, color: '#555', },
+  dayDetails: { paddingHorizontal: 15, paddingBottom: 5, borderTopWidth: 1, borderTopColor: '#eee', },
+  entryItem: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#f5f5f5', },
+  entryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3, },
+  entryName: { fontWeight: 'bold', fontSize: 15, flex: 1, marginRight: 10, color: '#2c3e50', },
+  entryCalculatedKcal: { fontWeight: 'bold', fontSize: 15, color: '#e74c3c', },
+  entryDetails: { fontSize: 13, color: '#7f8c8d', },
+  entryTimestamp: { fontSize: 11, color: '#95a5a6', },
+  emptyText: { textAlign: 'center', marginTop: 50, fontSize: 16, color: '#666', }
 });
