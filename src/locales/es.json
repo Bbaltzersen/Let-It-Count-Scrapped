@@ -1,0 +1,11 @@
+{
+    "translation": {
+      "home": {
+        "title": "Let it count - Pantalla Principal",
+        "greeting": "¡Hola!"
+      },
+      "common": {
+        "loading": "Cargando..."
+      }
+    }
+  }

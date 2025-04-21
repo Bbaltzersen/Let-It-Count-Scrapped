@@ -1,13 +1,17 @@
+// src/app/index.tsx
 import React from 'react';
-import { StyleSheet, View, SafeAreaView, Text } from 'react-native'; // Added Text
+import { StyleSheet, View, Text } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useTranslation } from 'react-i18next'; // Import the hook
 
-export default function HomeScreen() { // Renamed component for clarity
+export default function HomeScreen() {
+  const { t } = useTranslation(); // Get the translation function 't'
+
   return (
-    // Using View here as SafeAreaView is often handled by the layout in Expo Router
     <View style={styles.container}>
-      <Text>Let it count - Home Screen</Text>
-      {/* Your calorie entry form, list etc. will go here */}
+      {/* Use t() function with keys from your JSON files */}
+      <Text>{t('home.title')}</Text>
+      <Text>{t('home.greeting')}</Text>
       <StatusBar style="auto" />
     </View>
   );
@@ -17,7 +21,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center', // Example: center content
-    justifyContent: 'center', // Example: center content
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

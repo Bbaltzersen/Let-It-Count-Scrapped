@@ -1,0 +1,11 @@
+{
+    "translation": {
+      "home": {
+        "title": "Let it count - Home Screen",
+        "greeting": "Hello!"
+      },
+      "common": {
+        "loading": "Loading..."
+      }
+    }
+  }

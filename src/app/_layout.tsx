@@ -1,14 +1,28 @@
-import { Stack } from 'expo-router';
+// src/app/_layout.tsx
+import '../config/i18n';             // ← make sure this runs first!
 import React from 'react';
+import { Stack } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 export default function RootLayout() {
-  // Set up the Stack navigator.
+  const { t } = useTranslation();
+
   return (
     <Stack>
-      {/* Define screens within the Stack here later if needed,
-          or configure options for the default screen (index.tsx) */}
-      <Stack.Screen name="index" options={{ title: 'Let it count' }} />
-      {/* Add other screens like <Stack.Screen name="settings" /> later */}
+      <Stack.Screen
+        name="index"
+        options={{
+          // localize the header title
+          title: t('home.title'),
+        }}
+      />
+      {/*
+        // later, if you add more screens, you can do:
+        <Stack.Screen 
+          name="settings" 
+          options={{ title: t('common.settings') }} 
+        />
+      */}
     </Stack>
   );
 }
