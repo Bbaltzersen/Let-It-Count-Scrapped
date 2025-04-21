@@ -100,5 +100,19 @@ export async function getEntriesForDay(targetDate: Date): Promise<Entry[]> {
     }
 }
 
+export async function getAllEntries(): Promise<Entry[]> {
+    const currentDb = await getDb();
+    try {
+        // Select all entries, newest first
+        const results = await currentDb.getAllAsync<Entry>(
+            'SELECT * FROM entries ORDER BY createdAt DESC'
+        );
+        console.log(`Workspaceed ${results?.length ?? 0} total entries.`);
+        return results ?? []; // Return empty array if results are null/undefined
+    } catch (error) {
+        console.error("Error fetching all entries:", error);
+        throw error;
+    }
+}
 
 // Add other functions like getDailySummaries, etc. later
