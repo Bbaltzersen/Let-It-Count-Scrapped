@@ -9,7 +9,9 @@ import {
   ActivityIndicator,
   SafeAreaView,
 } from 'react-native';
-import { useTranslation } from 'react-i18next'; // Import useTranslation
+import { useTranslation } from 'react-i18next';
+// Import useFocusEffect from expo-router (or fallback to @react-navigation/native if needed)
+import { useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 // Import shared type and utility function
@@ -27,16 +29,12 @@ interface DailyData {
 }
 
 export default function HistoryScreen() {
-  // Get t function AND i18n instance from the hook
   const { t, i18n } = useTranslation();
   const [dailyData, setDailyData] = useState<DailyData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // Keep loading state
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
 
-  // Helper function (imported)
-  // const calculateCalories = ...
-
-  // Function to group entries by day and calculate totals
+  // Function to group entries by day and calculate totals (keep as is)
   const processEntries = useCallback((allEntries: Entry[]): DailyData[] => {
     if (!allEntries || allEntries.length === 0) return [];
     const grouped: { [date: string]: { entries: Entry[]; totalCalories: number } } = {};
@@ -57,36 +55,46 @@ export default function HistoryScreen() {
         entries: grouped[date].entries.sort((a,b)=> b.createdAt - a.createdAt),
         totalCalories: grouped[date].totalCalories,
       }));
-  }, []); // Removed calculateCalories from dependency array as it's imported
+  }, []);
 
-  // Fetch and process data on mount
-  useEffect(() => {
-    const loadHistory = async () => {
-      setIsLoading(true);
-      try {
-        const allEntries = await getAllEntries();
-        const processedData = processEntries(allEntries);
-        setDailyData(processedData);
-      } catch (error) {
-        console.error("Failed to load history:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadHistory();
-  }, [processEntries]);
+  // --- Replace useEffect with useFocusEffect ---
+  useFocusEffect(
+    useCallback(() => {
+      // This function will run when the screen comes into focus
+      const loadHistory = async () => {
+        console.log("History screen focused, loading data...");
+        // Set loading true only if data isn't already loaded maybe?
+        // Or always show loading briefly for feedback
+        setIsLoading(true);
+        try {
+          const allEntries = await getAllEntries();
+          const processedData = processEntries(allEntries);
+          setDailyData(processedData);
+        } catch (error) {
+          console.error("Failed to load history:", error);
+          // Optionally show an error Alert here too
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
-  // Toggle expansion for a day
+      loadHistory();
+
+      // Optional: Return a cleanup function if needed when screen goes out of focus
+      // return () => console.log("History screen blurred");
+    }, [processEntries]) // Dependency array for useCallback wrapper
+  );
+  // ---------------------------------------------
+
+  // Toggle expansion for a day (keep as is)
   const toggleDayExpansion = (date: string) => {
     setExpandedDay((current) => (current === date ? null : date));
   };
 
-  // Render item for the main list (each day)
+  // Render item for the main list (each day) (keep as is)
   const renderDayItem = ({ item }: { item: DailyData }) => {
     const isExpanded = expandedDay === item.date;
-    // Parse date string carefully - adding time helps avoid timezone interpretation issues
     const displayDate = new Date(item.date + 'T00:00:00');
-    // Get current language from i18n instance
     const currentLanguage = i18n.language;
 
     return (
@@ -97,26 +105,19 @@ export default function HistoryScreen() {
           activeOpacity={0.7}
         >
           <Text style={styles.dayDateText}>
-            {/* --- FIX: Pass currentLanguage to toLocaleDateString --- */}
-            {displayDate.toLocaleDateString(currentLanguage, { // <-- Pass language here
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
+            {displayDate.toLocaleDateString(currentLanguage, {
+              weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
             })}
-            {/* ------------------------------------------------------- */}
           </Text>
           <View style={styles.dayTotalRow}>
               <Text style={styles.dayTotalText}>{t('history.dailyTotal', 'Total:')} {item.totalCalories} kcal</Text>
               <Ionicons
                 name={isExpanded ? 'chevron-up-outline' : 'chevron-down-outline'}
-                size={20}
-                color="#666"
+                size={20} color="#666"
               />
           </View>
         </TouchableOpacity>
 
-        {/* Conditionally render details */}
         {isExpanded && (
           <View style={styles.dayDetails}>
             {item.entries.map((entry) => (
@@ -140,6 +141,7 @@ export default function HistoryScreen() {
   // --- Component Return ---
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Show loading indicator only when isLoading is true AND data is empty initially */}
       {isLoading && dailyData.length === 0 ? (
         <View style={styles.centerStatus}>
             <ActivityIndicator size="large" />
@@ -152,6 +154,9 @@ export default function HistoryScreen() {
           keyExtractor={(item) => item.date}
           ListEmptyComponent={!isLoading ? <Text style={styles.emptyText}>{t('history.noHistory', 'No history data found.')}</Text> : null}
           contentContainerStyle={styles.listContentContainer}
+          // Optional: Add pull-to-refresh using onRefresh prop if needed
+          // onRefresh={loadHistory} // You'd need to expose loadHistory or wrap it
+          // refreshing={isLoading}
         />
       )}
     </SafeAreaView>
