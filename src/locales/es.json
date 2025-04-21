@@ -1,11 +1,42 @@
 {
     "translation": {
+      "common": {
+        "loading": "Cargando...",
+        "success": "Éxito",
+        "settings": "Ajustes"
+      },
+      "error": {
+        "title": "Error",
+        "loadEntries": "Error al cargar las entradas.",
+        "addEntry": "Error al añadir la entrada.",
+        "invalidInputTitle": "Entrada Inválida",
+        "invalidInputMsg": "Por favor, rellena todos los campos correctamente (cantidad y kcal deben ser números positivos)."
+      },
       "home": {
-        "title": "Let it count - Pantalla Principal",
+        "title": "Registro Diario",
         "greeting": "¡Hola!"
       },
-      "common": {
-        "loading": "Cargando..."
+      "entry": {
+        "addTitle": "Añadir Nueva Entrada",
+        "namePlaceholder": "Nombre Alimento",
+        "amountPlaceholder": "Cantidad (g)",
+        "kcalPlaceholder": "kcal/100g",
+        "addButton": "Añadir Entrada",
+        "addedSuccess": "¡Entrada añadida!",
+        "totalToday": "Total Hoy:",
+        "todayTitle": "Entradas de Hoy",
+        "noEntries": "Aún no hay entradas para hoy."
+      },
+      "drawer": {
+        "home": "Inicio",
+        "history": "Historial",
+        "settings": "Ajustes"
+      },
+      "history": {
+         "title": "Historial de Entradas"
+      },
+       "settings": {
+         "title": "Ajustes"
       }
     }
   }

@@ -1,11 +1,42 @@
 {
     "translation": {
+      "common": {
+        "loading": "Loading...",
+        "success": "Success",
+        "settings": "Settings"
+      },
+      "error": {
+        "title": "Error",
+        "loadEntries": "Failed to load entries.",
+        "addEntry": "Failed to add entry.",
+        "invalidInputTitle": "Invalid Input",
+        "invalidInputMsg": "Please fill in all fields correctly (amount and kcal must be positive numbers)."
+      },
       "home": {
-        "title": "Let it count - Home Screen",
+        "title": "Daily Log",
         "greeting": "Hello!"
       },
-      "common": {
-        "loading": "Loading..."
+      "entry": {
+        "addTitle": "Add New Entry",
+        "namePlaceholder": "Food Name",
+        "amountPlaceholder": "Amount (g)",
+        "kcalPlaceholder": "kcal/100g",
+        "addButton": "Add Entry",
+        "addedSuccess": "Entry added!",
+        "totalToday": "Total Today:",
+        "todayTitle": "Today's Entries",
+        "noEntries": "No entries yet for today."
+      },
+      "drawer": {
+        "home": "Home",
+        "history": "History",
+        "settings": "Settings"
+      },
+      "history": {
+         "title": "History"
+      },
+       "settings": {
+         "title": "Settings"
       }
     }
   }
