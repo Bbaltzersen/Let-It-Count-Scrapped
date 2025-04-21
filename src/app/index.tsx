@@ -33,6 +33,7 @@ export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
 
   // --- Data Fetching ---
+  // Memoize loadEntries function - depends on t for translated error messages
   const loadEntries = useCallback(async () => {
     console.log("Loading entries...");
     setIsLoading(true);
@@ -45,11 +46,13 @@ export default function HomeScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [t]);
+  }, [t]); // Correct dependency for useCallback
 
+  // Load entries ONCE when the component mounts
   useEffect(() => {
     loadEntries();
-  }, [loadEntries]);
+  // highlight-next-line
+  }, []); // FIX: Empty dependency array ensures this runs only once
 
   // --- Actions ---
   const handleAddEntry = async () => {
@@ -69,7 +72,7 @@ export default function HomeScreen() {
       setName('');
       setAmount('');
       setKcalPer100g('');
-      await loadEntries();
+      await loadEntries(); // Reload entries after adding
     } catch (error) {
       console.error("Failed to add entry:", error);
       Alert.alert(t('error.title', 'Error'), t('error.addEntry', 'Failed to add entry.'));
@@ -77,7 +80,7 @@ export default function HomeScreen() {
   };
 
   // --- Calculated Values ---
-  // calculateCalories function is now imported from utils
+  // calculateCalories function is imported from utils
 
   const totalCaloriesToday = useMemo(() => {
     // Use the imported calculateCalories function

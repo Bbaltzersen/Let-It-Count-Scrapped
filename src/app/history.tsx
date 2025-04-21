@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   SafeAreaView,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 // Import shared type and utility function
@@ -27,13 +27,16 @@ interface DailyData {
 }
 
 export default function HistoryScreen() {
-  const { t } = useTranslation();
+  // Get t function AND i18n instance from the hook
+  const { t, i18n } = useTranslation();
   const [dailyData, setDailyData] = useState<DailyData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
 
+  // Helper function (imported)
+  // const calculateCalories = ...
+
   // Function to group entries by day and calculate totals
-  // Use imported calculateCalories
   const processEntries = useCallback((allEntries: Entry[]): DailyData[] => {
     if (!allEntries || allEntries.length === 0) return [];
     const grouped: { [date: string]: { entries: Entry[]; totalCalories: number } } = {};
@@ -43,7 +46,7 @@ export default function HistoryScreen() {
       if (!grouped[dateString]) {
         grouped[dateString] = { entries: [], totalCalories: 0 };
       }
-      const calculatedEntryCalories = calculateCalories(entry); // Use imported function
+      const calculatedEntryCalories = calculateCalories(entry);
       grouped[dateString].entries.push(entry);
       grouped[dateString].totalCalories += calculatedEntryCalories;
     });
@@ -54,7 +57,7 @@ export default function HistoryScreen() {
         entries: grouped[date].entries.sort((a,b)=> b.createdAt - a.createdAt),
         totalCalories: grouped[date].totalCalories,
       }));
-  }, []); // Dependency array is empty if calculateCalories is stable import
+  }, []); // Removed calculateCalories from dependency array as it's imported
 
   // Fetch and process data on mount
   useEffect(() => {
@@ -81,7 +84,10 @@ export default function HistoryScreen() {
   // Render item for the main list (each day)
   const renderDayItem = ({ item }: { item: DailyData }) => {
     const isExpanded = expandedDay === item.date;
+    // Parse date string carefully - adding time helps avoid timezone interpretation issues
     const displayDate = new Date(item.date + 'T00:00:00');
+    // Get current language from i18n instance
+    const currentLanguage = i18n.language;
 
     return (
       <View style={styles.dayContainer}>
@@ -91,7 +97,14 @@ export default function HistoryScreen() {
           activeOpacity={0.7}
         >
           <Text style={styles.dayDateText}>
-            {displayDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            {/* --- FIX: Pass currentLanguage to toLocaleDateString --- */}
+            {displayDate.toLocaleDateString(currentLanguage, { // <-- Pass language here
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+            {/* ------------------------------------------------------- */}
           </Text>
           <View style={styles.dayTotalRow}>
               <Text style={styles.dayTotalText}>{t('history.dailyTotal', 'Total:')} {item.totalCalories} kcal</Text>
@@ -110,7 +123,6 @@ export default function HistoryScreen() {
               <View key={entry.id} style={styles.entryItem}>
                  <View style={styles.entryRow}>
                     <Text style={styles.entryName}>{entry.name}</Text>
-                    {/* Use imported calculateCalories function */}
                     <Text style={styles.entryCalculatedKcal}>~ {calculateCalories(entry)} kcal</Text>
                  </View>
                  <View style={styles.entryRow}>

@@ -10,7 +10,8 @@
         "loadEntries": "Error al cargar las entradas.",
         "addEntry": "Error al añadir la entrada.",
         "invalidInputTitle": "Entrada Inválida",
-        "invalidInputMsg": "Por favor, rellena todos los campos correctamente (cantidad y kcal deben ser números positivos)."
+        "invalidInputMsg": "Por favor, rellena todos los campos correctamente (cantidad y kcal deben ser números positivos).",
+        "changeLanguage": "Error al cambiar el idioma."
       },
       "home": {
         "title": "Registro Diario",
@@ -38,7 +39,13 @@
          "noHistory": "No se encontraron datos históricos."
       },
        "settings": {
-         "title": "Ajustes"
+         "title": "Ajustes",
+         "currentLanguage": "Idioma Actual:",
+         "selectLanguage": "Seleccionar Idioma:",
+         "changeToEnglish": "English",
+         "changeToSpanish": "Español",
+         "languageChanged": "Idioma cambiado."
       }
     }
   }
+  

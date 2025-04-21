@@ -10,7 +10,8 @@
         "loadEntries": "Failed to load entries.",
         "addEntry": "Failed to add entry.",
         "invalidInputTitle": "Invalid Input",
-        "invalidInputMsg": "Please fill in all fields correctly (amount and kcal must be positive numbers)."
+        "invalidInputMsg": "Please fill in all fields correctly (amount and kcal must be positive numbers).",
+        "changeLanguage": "Failed to change language."
       },
       "home": {
         "title": "Daily Log",
@@ -38,7 +39,13 @@
          "noHistory": "No history data found."
       },
        "settings": {
-         "title": "Settings"
+         "title": "Settings",
+         "currentLanguage": "Current Language:",
+         "selectLanguage": "Select Language:",
+         "changeToEnglish": "English",
+         "changeToSpanish": "Español",
+         "languageChanged": "Language changed."
       }
     }
   }
+  
