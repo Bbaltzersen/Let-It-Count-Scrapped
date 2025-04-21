@@ -33,7 +33,9 @@
         "settings": "Ajustes"
       },
       "history": {
-         "title": "Historial de Entradas"
+         "title": "Historial de Entradas",
+         "dailyTotal": "Total:",
+         "noHistory": "No se encontraron datos históricos."
       },
        "settings": {
          "title": "Ajustes"
