@@ -2,16 +2,21 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "baseUrl": "src", // Use src as the base for absolute imports
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+       // Keep or remove the @ alias based on preference now
+       // If keeping, maybe point it to src? "@/*": ["./src/*"]
+       // Or just rely on baseUrl and remove paths
     }
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
+    "src/**/*.ts",    // Include everything in src
+    "src/**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-  ]
+    "expo-env.d.ts",
+     "App.tsx" // Explicitly include root App.tsx if needed
+  ],
+   "exclude": [
+     "node_modules"
+   ]
 }
