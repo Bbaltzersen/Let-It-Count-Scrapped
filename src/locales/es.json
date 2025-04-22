@@ -11,7 +11,8 @@
         "addEntry": "Error al añadir la entrada.",
         "invalidInputTitle": "Entrada Inválida",
         "invalidInputMsg": "Por favor, rellena todos los campos correctamente (cantidad y kcal deben ser números positivos).",
-        "changeLanguage": "Error al cambiar el idioma."
+        "changeLanguage": "Error al cambiar el idioma.",
+        "changeTheme": "Error al guardar la preferencia de tema."
       },
       "home": {
         "title": "Registro Diario",
@@ -44,7 +45,8 @@
          "selectLanguage": "Seleccionar Idioma:",
          "changeToEnglish": "English",
          "changeToSpanish": "Español",
-         "languageChanged": "Idioma cambiado."
+         "languageChanged": "Idioma cambiado.",
+         "enableDarkMode": "Activar Modo Oscuro" 
       }
     }
   }

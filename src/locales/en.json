@@ -11,7 +11,8 @@
         "addEntry": "Failed to add entry.",
         "invalidInputTitle": "Invalid Input",
         "invalidInputMsg": "Please fill in all fields correctly (amount and kcal must be positive numbers).",
-        "changeLanguage": "Failed to change language."
+        "changeLanguage": "Failed to change language.",
+        "changeTheme": "Failed to save theme preference." 
       },
       "home": {
         "title": "Daily Log",
@@ -44,7 +45,8 @@
          "selectLanguage": "Select Language:",
          "changeToEnglish": "English",
          "changeToSpanish": "Español",
-         "languageChanged": "Language changed."
+         "languageChanged": "Language changed.",
+         "enableDarkMode": "Enable Dark Mode" 
       }
     }
   }
