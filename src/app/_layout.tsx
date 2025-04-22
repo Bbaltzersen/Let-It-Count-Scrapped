@@ -12,15 +12,13 @@ import { initializeI18n } from 'config/i18n';
 import { initializeDatabase } from 'services/database';
 
 // Import Theme Provider and Hook
-import { ThemeProvider, useTheme } from '../context/themeContext'; // Adjust path if needed
+import { ThemeProvider, useTheme } from 'context/themeContext'; // Using camelCase filename
 
 // Navigation component - Renders the Drawer navigator and uses the theme context
-// This will only be rendered AFTER the ThemeProvider and initializers are ready
 function RootLayoutNav() {
-  // Hooks can be used here because ThemeProvider is an ancestor
   const { t } = useTranslation();
   const navigation = useNavigation();
-  const { colors } = useTheme(); // Use the theme hook
+  const { colors } = useTheme();
 
   const openDrawer = () => {
     navigation.dispatch(DrawerActions.openDrawer());
@@ -33,35 +31,53 @@ function RootLayoutNav() {
     drawerStyle: { backgroundColor: colors.card },
     drawerActiveTintColor: colors.primary,
     drawerInactiveTintColor: colors.textSecondary,
-    headerLeft: () => (
-      <TouchableOpacity onPress={openDrawer} style={{ marginLeft: 15 }}>
+    headerLeft: () => null,
+    headerTitleAlign: 'left' as 'left' | 'center',
+    headerRight: () => (
+      <TouchableOpacity onPress={openDrawer} style={styles.headerButton}>
         <Ionicons name="menu" size={28} color={colors.icon} />
       </TouchableOpacity>
     ),
+    drawerPosition: 'right' as 'left' | 'right',
   };
 
   return (
+    // Pass drawerPosition directly to Drawer component
     <Drawer screenOptions={screenOptions}>
       {/* Configure each screen */}
       <Drawer.Screen
-        name="index"
+        name="index" // Home
         options={{
           drawerLabel: t('drawer.home', 'Home'),
-          title: t('home.title'), // t() should work correctly now
+          title: t('home.title'), // Title for the Home screen header
         }}
       />
+      {/* --- Profile Screen Entry (Points to Stack Layout) --- */}
+      <Drawer.Screen
+        name="profile" // This now points to the profile stack layout
+        options={{
+          // Set the label for the drawer item only
+          drawerLabel: t('drawer.profile', 'Profile & Goals'),
+          // The title displayed in the header is controlled by profile/_layout.tsx
+          // and the specific screen within that stack (e.g., profile/index or profile/edit)
+          // We can optionally hide the Drawer's header for this item if the Stack handles it
+          headerShown: true, // Keep drawer header, stack header is hidden for profile/index
+          title: t('profile.title'), // Set the Drawer header title for this section
+        }}
+      />
+      {/* ---------------------------------------------------- */}
       <Drawer.Screen
         name="history"
         options={{
           drawerLabel: t('drawer.history', 'History'),
-          title: t('history.title'),
+          title: t('history.title'), // Title for the History screen header
         }}
       />
        <Drawer.Screen
         name="settings"
         options={{
           drawerLabel: t('drawer.settings', 'Settings'),
-          title: t('settings.title'),
+          title: t('settings.title'), // Title for the Settings screen header
         }}
       />
     </Drawer>
@@ -69,96 +85,50 @@ function RootLayoutNav() {
 }
 
 // Component to handle the initialization logic and display loading/error states
+// (InitialLoadingGate remains the same as before)
 function InitialLoadingGate({ children }: { children: React.ReactNode }) {
   const [isDbReady, setIsDbReady] = useState(false);
   const [isI18nReady, setIsI18nReady] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
 
   useEffect(() => {
-    let isMounted = true; // Prevent state updates if component unmounts quickly
-
+    let isMounted = true;
     const initializeApp = async () => {
       try {
         console.log("Starting app initialization...");
-        // Await initializers sequentially or concurrently
-        // Running sequentially might be slightly safer for dependencies
-        await initializeDatabase();
-        if (!isMounted) return;
-        setIsDbReady(true);
-        console.log("Database initialized.");
-
-        await initializeI18n();
-        if (!isMounted) return;
-        setIsI18nReady(true);
-        console.log("i18n initialized.");
-
+        await initializeDatabase(); if (!isMounted) return; setIsDbReady(true); console.log("Database initialized.");
+        await initializeI18n(); if (!isMounted) return; setIsI18nReady(true); console.log("i18n initialized.");
         console.log("App initialization complete.");
       } catch (error) {
         console.error("App initialization failed:", error);
         const message = error instanceof Error ? error.message : "An unknown error occurred";
-        if (isMounted) {
-          setInitError(message);
-        }
+        if (isMounted) { setInitError(message); }
       }
     };
-
     initializeApp();
+    return () => { isMounted = false; };
+  }, []);
 
-    return () => {
-      isMounted = false; // Cleanup function to set flag on unmount
-    };
-  }, []); // Empty dependency array ensures this runs only once
-
-  if (initError) {
-    // Render error state - Cannot use theme here reliably
-    return (
-        <View style={styles.centerStatus}>
-            <Text style={styles.errorText}>Initialization Error: {initError}</Text>
-            <Text>Please restart the app.</Text>
-        </View>
-    );
-  }
-
-  if (!isDbReady || !isI18nReady) {
-    // Render loading state - Cannot use theme or i18n here reliably
-    return (
-        <View style={styles.centerStatus}>
-            <ActivityIndicator size="large" color="#0000ff" />
-            <Text>Loading...</Text>
-        </View>
-    );
-  }
-
-  // Initializers ready, render the children (which will be RootLayoutNav)
+  if (initError) { return ( <View style={styles.centerStatus}><Text style={styles.errorText}>Initialization Error: {initError}</Text><Text>Please restart the app.</Text></View> ); }
+  if (!isDbReady || !isI18nReady) { return ( <View style={styles.centerStatus}><ActivityIndicator size="large" color="#0000ff" /><Text>Loading...</Text></View> ); }
   return <>{children}</>;
 }
 
 // Main layout component: Provides Theme and delegates loading/nav rendering
+// (RootLayout remains the same as before)
 export default function RootLayout() {
   return (
-    // ThemeProvider wraps everything
     <ThemeProvider>
-      {/* InitialLoadingGate handles async setup and shows loading/error */}
       <InitialLoadingGate>
-        {/* RootLayoutNav renders the actual navigator once setup is complete */}
         <RootLayoutNav />
       </InitialLoadingGate>
     </ThemeProvider>
   );
 }
 
-// Styles
+// Styles (remains the same as before)
 const styles = StyleSheet.create({
-  centerStatus: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#ffffff', // Default background for loading/error
-   },
-  errorText: {
-    color: 'red',
-    marginBottom: 10,
-    textAlign: 'center'
-  }
+  centerStatus: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, backgroundColor: '#ffffff', },
+  errorText: { color: 'red', marginBottom: 10, textAlign: 'center' },
+  headerButton: { paddingHorizontal: 15, paddingVertical: 5, }
 });

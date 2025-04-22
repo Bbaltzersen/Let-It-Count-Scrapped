@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   listTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     marginTop: 10,
     marginBottom: 10,

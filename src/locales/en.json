@@ -1,53 +1,89 @@
 {
-    "translation": {
-      "common": {
-        "loading": "Loading...",
-        "success": "Success",
-        "settings": "Settings"
-      },
-      "error": {
-        "title": "Error",
-        "loadEntries": "Failed to load entries.",
-        "addEntry": "Failed to add entry.",
-        "invalidInputTitle": "Invalid Input",
-        "invalidInputMsg": "Please fill in all fields correctly (amount and kcal must be positive numbers).",
-        "changeLanguage": "Failed to change language.",
-        "changeTheme": "Failed to save theme preference." 
-      },
-      "home": {
-        "title": "Daily Log",
-        "greeting": "Hello!"
-      },
-      "entry": {
-        "addTitle": "Add New Entry",
-        "namePlaceholder": "Food Name",
-        "amountPlaceholder": "Amount (g)",
-        "kcalPlaceholder": "kcal/100g",
-        "addButton": "Add Entry",
-        "addedSuccess": "Entry added!",
-        "totalToday": "Total Today:",
-        "todayTitle": "Today's Entries",
-        "noEntries": "No entries yet for today."
-      },
-      "drawer": {
-        "home": "Home",
-        "history": "History",
-        "settings": "Settings"
-      },
-      "history": {
-         "title": "Entry History",
-         "dailyTotal": "Total:",
-         "noHistory": "No history data found."
-      },
-       "settings": {
-         "title": "Settings",
-         "currentLanguage": "Current Language:",
-         "selectLanguage": "Select Language:",
-         "changeToEnglish": "English",
-         "changeToSpanish": "Español",
-         "languageChanged": "Language changed.",
-         "enableDarkMode": "Enable Dark Mode" 
-      }
+  "translation": {
+    "common": {
+      "loading": "Loading...",
+      "success": "Success",
+      "settings": "Settings",
+      "select": "Select..."
+    },
+    "error": {
+      "title": "Error",
+      "loadEntries": "Failed to load entries.",
+      "addEntry": "Failed to add entry.",
+      "invalidInputTitle": "Invalid Input",
+      "invalidInputMsg": "Please fill in all fields correctly (amount and kcal must be positive numbers).",
+      "changeLanguage": "Failed to change language.",
+      "changeTheme": "Failed to save theme preference."
+    },
+    "home": {
+      "title": "Daily Log",
+      "greeting": "Hello!"
+    },
+    "entry": {
+      "addTitle": "Add New Entry",
+      "namePlaceholder": "Food Name",
+      "amountPlaceholder": "Amount (g)",
+      "kcalPlaceholder": "kcal/100g",
+      "addButton": "Add Entry",
+      "addedSuccess": "Entry added!",
+      "totalToday": "Total Today:",
+      "todayTitle": "Today's Entries",
+      "noEntries": "No entries yet for today.",
+      "consumed": "Consumed:",
+      "remaining": "Remaining:"
+    },
+    "drawer": {
+      "home": "Home",
+      "profile": "Profile & Goals",
+      "history": "History",
+      "settings": "Settings"
+    },
+    "history": {
+       "title": "Entry History",
+       "dailyTotal": "Total:",
+       "noHistory": "No history data found."
+    },
+     "settings": {
+       "title": "Settings",
+       "currentLanguage": "Current Language:",
+       "selectLanguage": "Select Language:",
+       "changeToEnglish": "English",
+       "changeToSpanish": "Español",
+       "languageChanged": "Language changed.",
+       "enableDarkMode": "Enable Dark Mode"
+    },
+    "profile": {
+        "title": "Profile & Goals",
+        "preferences": "Preferences",
+        "editTitle": "Edit Profile & Goals",
+        "summaryTitle": "Your Profile Summary", 
+        "placeholder": "Profile settings will go here.",
+        "simpleMode": "Simple",
+        "advancedMode": "Advanced",
+        "manualGoal": "Manual Daily Goal (kcal):",
+        "goalPlaceholder": "e.g., 2000",
+        "age": "Age:",
+        "sex": "Sex:",
+        "sexMale": "Male",
+        "sexFemale": "Female",
+        "height": "Height (cm):",
+        "weight": "Weight (kg):",
+        "activityLevel": "Activity Level:",
+        "activitySedentary": "Sedentary",
+        "activityLight": "Lightly Active",
+        "activityModerate": "Moderately Active",
+        "activityVery": "Very Active",
+        "weightGoalNumerical": "Weekly Weight Goal (kg):", 
+        "weightGoalPlaceholder": "e.g., -0.5, 0, 0.25", 
+        "calculatedGoal": "Calculated Goal:",
+        "incomplete": "Enter details above",
+        "updateProfileError": "Failed to save profile data.",
+        "loadError": "Failed to load profile data.",
+        "saveError": "Failed to save setting.",
+        "currentGoalType": "Current Goal Type:",
+        "activeGoal": "Active Daily Goal:",
+        "editButton": "Edit Profile & Goals",
+        "analyticsComingSoon": "Analytics coming soon..."
     }
   }
-  
+}

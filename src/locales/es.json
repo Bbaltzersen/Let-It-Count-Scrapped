@@ -1,53 +1,89 @@
 {
-    "translation": {
-      "common": {
-        "loading": "Cargando...",
-        "success": "Éxito",
-        "settings": "Ajustes"
-      },
-      "error": {
-        "title": "Error",
-        "loadEntries": "Error al cargar las entradas.",
-        "addEntry": "Error al añadir la entrada.",
-        "invalidInputTitle": "Entrada Inválida",
-        "invalidInputMsg": "Por favor, rellena todos los campos correctamente (cantidad y kcal deben ser números positivos).",
-        "changeLanguage": "Error al cambiar el idioma.",
-        "changeTheme": "Error al guardar la preferencia de tema."
-      },
-      "home": {
-        "title": "Registro Diario",
-        "greeting": "¡Hola!"
-      },
-      "entry": {
-        "addTitle": "Añadir Nueva Entrada",
-        "namePlaceholder": "Nombre Alimento",
-        "amountPlaceholder": "Cantidad (g)",
-        "kcalPlaceholder": "kcal/100g",
-        "addButton": "Añadir Entrada",
-        "addedSuccess": "¡Entrada añadida!",
-        "totalToday": "Total Hoy:",
-        "todayTitle": "Entradas de Hoy",
-        "noEntries": "Aún no hay entradas para hoy."
-      },
-      "drawer": {
-        "home": "Inicio",
-        "history": "Historial",
-        "settings": "Ajustes"
-      },
-      "history": {
-         "title": "Historial de Entradas",
-         "dailyTotal": "Total:",
-         "noHistory": "No se encontraron datos históricos."
-      },
-       "settings": {
-         "title": "Ajustes",
-         "currentLanguage": "Idioma Actual:",
-         "selectLanguage": "Seleccionar Idioma:",
-         "changeToEnglish": "English",
-         "changeToSpanish": "Español",
-         "languageChanged": "Idioma cambiado.",
-         "enableDarkMode": "Activar Modo Oscuro" 
-      }
+  "translation": {
+    "common": {
+      "loading": "Cargando...",
+      "success": "Éxito",
+      "settings": "Ajustes",
+      "select": "Seleccionar..."
+    },
+    "error": {
+      "title": "Error",
+      "loadEntries": "Error al cargar las entradas.",
+      "addEntry": "Error al añadir la entrada.",
+      "invalidInputTitle": "Entrada Inválida",
+      "invalidInputMsg": "Por favor, rellena todos los campos correctamente (cantidad y kcal deben ser números positivos).",
+      "changeLanguage": "Error al cambiar el idioma.",
+      "changeTheme": "Error al guardar la preferencia de tema."
+    },
+    "home": {
+      "title": "Registro Diario",
+      "greeting": "¡Hola!"
+    },
+    "entry": {
+      "addTitle": "Añadir Nueva Entrada",
+      "namePlaceholder": "Nombre Alimento",
+      "amountPlaceholder": "Cantidad (g)",
+      "kcalPlaceholder": "kcal/100g",
+      "addButton": "Añadir Entrada",
+      "addedSuccess": "¡Entrada añadida!",
+      "totalToday": "Total Hoy:",
+      "todayTitle": "Entradas de Hoy",
+      "noEntries": "Aún no hay entradas para hoy.",
+      "consumed": "Consumido:",
+      "remaining": "Restante:"
+    },
+    "drawer": {
+      "home": "Inicio",
+      "profile": "Perfil y Metas",
+      "history": "Historial",
+      "settings": "Ajustes"
+    },
+    "history": {
+       "title": "Historial de Entradas",
+       "dailyTotal": "Total:",
+       "noHistory": "No se encontraron datos históricos."
+    },
+     "settings": {
+       "title": "Ajustes",
+       "currentLanguage": "Idioma Actual:",
+       "selectLanguage": "Seleccionar Idioma:",
+       "changeToEnglish": "English",
+       "changeToSpanish": "Español",
+       "languageChanged": "Idioma cambiado.",
+       "enableDarkMode": "Activar Modo Oscuro"
+    },
+    "profile": {
+        "title": "Perfil y Metas",
+        "preferences": "Preferencias",
+        "editTitle": "Editar Perfil y Metas",
+        "summaryTitle": "Resumen de tu Perfil",
+        "placeholder": "Los ajustes del perfil irán aquí.",
+        "simpleMode": "Simple",
+        "advancedMode": "Avanzado",
+        "manualGoal": "Meta Diaria Manual (kcal):",
+        "goalPlaceholder": "ej., 2000",
+        "age": "Edad:",
+        "sex": "Sexo:",
+        "sexMale": "Masculino",
+        "sexFemale": "Femenino",
+        "height": "Altura (cm):",
+        "weight": "Peso (kg):",
+        "activityLevel": "Nivel de Actividad:",
+        "activitySedentary": "Sedentario",
+        "activityLight": "Ligera",
+        "activityModerate": "Moderada",
+        "activityVery": "Muy Activa",
+        "weightGoalNumerical": "Meta Semanal de Peso (kg):", 
+        "weightGoalPlaceholder": "ej., -0.5, 0, 0.25",
+        "calculatedGoal": "Meta Calculada:",
+        "incomplete": "Introduce los detalles arriba",
+        "updateProfileError": "Error al guardar los datos del perfil.",
+        "loadError": "Error al cargar los datos del perfil.",
+        "saveError": "Error al guardar el ajuste.",
+        "currentGoalType": "Tipo de Meta Actual:",
+        "activeGoal": "Meta Diaria Activa:",
+        "editButton": "Editar Perfil y Metas",
+        "analyticsComingSoon": "Analíticas próximamente..."
     }
   }
-  
+}
