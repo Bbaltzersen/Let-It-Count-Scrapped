@@ -6,7 +6,8 @@ export interface ThemeColors {
     card: string;
     text: string;
     textSecondary: string;
-    primary: string; // This will be red in dark mode
+    primary: string; // Green in dark mode, Blue in light
+    danger: string; // Red color for warnings/over limit/toggles
     border: string;
     inputBackground: string;
     inputText: string;
@@ -15,16 +16,20 @@ export interface ThemeColors {
     totalText: string;
     totalValue: string;
     icon: string;
+    kcalHighlight: string; // New color specifically for kcal display
     // Add more colors as needed
   }
   
-  // Light theme remains the same
+  const KcalGreen = '#34d399'; // Define the green color once
+  
+  // Light theme
   export const lightTheme: ThemeColors = {
     background: '#f8f8f8',
     card: '#ffffff',
     text: '#1f2937',
     textSecondary: '#6b7280',
-    primary: '#3b82f6', // Blue in light mode
+    primary: KcalGreen, // Blue
+    danger: '#ef4444', // Red
     border: '#e5e7eb',
     inputBackground: '#ffffff',
     inputText: '#111827',
@@ -33,22 +38,25 @@ export interface ThemeColors {
     totalText: '#2c3e50',
     totalValue: '#34495e',
     icon: '#1f2937',
+    kcalHighlight: KcalGreen, // Use the defined green
   };
   
-  // --- Updated Dark Theme ---
+  // Dark Theme
   export const darkTheme: ThemeColors = {
-    background: '#000000', // Black background
-    card: '#1c1c1e', // Very dark grey for cards/surfaces
-    text: '#f2f2f7', // Off-white / very light grey for text
-    textSecondary: '#8e8e93', // Medium grey for secondary text
-    primary: '#ff3b30', // Red as the primary accent color
-    border: '#38383a', // Dark grey for borders
-    inputBackground: '#2c2c2e', // Slightly lighter dark grey for inputs
-    inputText: '#f2f2f7', // Light text for inputs
-    inputBorder: '#545458', // Grey border for inputs
-    totalBackground: '#1c1c1e', // Same as card
-    totalText: '#aeaeb2', // Lighter grey for total label
-    totalValue: '#f2f2f7', // Light value text
-    icon: '#f2f2f7', // Light icons
+    background: '#000000',
+    card: '#1c1c1e',
+    text: '#f2f2f7',
+    textSecondary: '#8e8e93',
+    primary: KcalGreen, // Keep primary as green
+    danger: '#f87171', // Red for danger/toggle
+    border: '#38383a',
+    inputBackground: '#2c2c2e',
+    inputText: '#f2f2f7',
+    inputBorder: '#545458',
+    totalBackground: '#1c1c1e',
+    totalText: '#aeaeb2',
+    totalValue: '#f2f2f7',
+    icon: '#f2f2f7',
+    kcalHighlight: KcalGreen, // Use the same defined green
   };
   
