@@ -47,7 +47,6 @@ export default function ProfileEditScreen() {
   const [calculatedGoal, setCalculatedGoal] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load stored profile
   useEffect(() => {
     (async () => {
       setIsLoading(true);
@@ -93,14 +92,16 @@ export default function ProfileEditScreen() {
         if (!isNaN(cg)) setCalculatedGoal(cg);
       } catch (err) {
         console.error(err);
-        Alert.alert(t('error.title', 'Error'), t('profile.loadError', 'Failed to load profile data.'));
+        Alert.alert(
+          t('error.title', 'Error'),
+          t('profile.loadError', 'Failed to load profile data.')
+        );
       } finally {
         setIsLoading(false);
       }
     })();
   }, [t]);
 
-  // Helper to save any key
   const saveData = useCallback(
     async (key: string, value: string | number | null) => {
       try {
@@ -111,13 +112,15 @@ export default function ProfileEditScreen() {
         }
       } catch (err) {
         console.error(err);
-        Alert.alert(t('error.title', 'Error'), t('profile.saveError', 'Failed to save setting.'));
+        Alert.alert(
+          t('error.title', 'Error'),
+          t('profile.saveError', 'Failed to save setting.')
+        );
       }
     },
     [t]
   );
 
-  // Recalculate when any advanced field changes
   useEffect(() => {
     if (mode !== 'advanced') return;
 
@@ -125,8 +128,8 @@ export default function ProfileEditScreen() {
     const h = parseInt(height, 10);
     const w = parseFloat(weight);
     const delta = weightGoalValue;
+    
     if (!isNaN(a) && sex && !isNaN(h) && !isNaN(w) && activityLevel) {
-      // Mifflin-St. Jeor BMR
       const bmr =
         sex === 'male'
           ? 88.362 + 13.397 * w + 4.799 * h - 5.677 * a
@@ -159,11 +162,13 @@ export default function ProfileEditScreen() {
     }
   }, [mode, age, sex, height, weight, activityLevel, weightGoalValue, saveData]);
 
-  // Handlers
   const onModeChange = (m: ProfileMode) => {
     setMode(m);
     saveData(PROFILE_MODE_KEY, m);
-    saveData(ACTIVE_GOAL_TYPE_KEY, m === 'simple' ? 'manual' : 'calculated');
+    saveData(
+      ACTIVE_GOAL_TYPE_KEY,
+      m === 'simple' ? 'manual' : 'calculated'
+    );
   };
   const onManualGoal = (text: string) => {
     const numOnly = text.replace(/[^0-9]/g, '');
@@ -195,7 +200,7 @@ export default function ProfileEditScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.loading, { backgroundColor: colors.background }]}>
+      <View style={[styles.loading, { backgroundColor: colors.background }]}> 
         <ActivityIndicator size="large" color={colors.primary} />
         <Text style={{ marginTop: 12, color: colors.text }}>
           {t('common.loading', 'Loading...')}
@@ -205,28 +210,23 @@ export default function ProfileEditScreen() {
   }
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}> 
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Mode Toggle */}
-        <View style={[styles.modeToggle, { borderColor: colors.border }]}>
+        <View style={[styles.modeToggle, { backgroundColor: colors.card, shadowColor: colors.shadow }]}> 
           <TouchableOpacity
             style={[
               styles.modeBtn,
-              mode === 'simple'
-                ? [styles.modeBtnActive, { backgroundColor: colors.primary }]
-                : { backgroundColor: colors.card },
+              mode === 'simple' && { backgroundColor: colors.primary }
             ]}
             onPress={() => onModeChange('simple')}
           >
             <Text
               style={[
                 styles.modeText,
-                mode === 'simple'
-                  ? styles.modeTextActive
-                  : { color: colors.primary },
+                mode === 'simple' && styles.modeTextActive,
               ]}
             >
               {t('profile.simpleMode', 'Simple')}
@@ -235,18 +235,14 @@ export default function ProfileEditScreen() {
           <TouchableOpacity
             style={[
               styles.modeBtn,
-              mode === 'advanced'
-                ? [styles.modeBtnActive, { backgroundColor: colors.primary }]
-                : { backgroundColor: colors.card },
+              mode === 'advanced' && { backgroundColor: colors.primary }
             ]}
             onPress={() => onModeChange('advanced')}
           >
             <Text
               style={[
                 styles.modeText,
-                mode === 'advanced'
-                  ? styles.modeTextActive
-                  : { color: colors.primary },
+                mode === 'advanced' && styles.modeTextActive,
               ]}
             >
               {t('profile.advancedMode', 'Advanced')}
@@ -254,21 +250,11 @@ export default function ProfileEditScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Simple */}
         {mode === 'simple' && (
-          <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[styles.label, { color: colors.text }]}>
-              {t('profile.manualGoal', 'Manual Daily Goal (kcal):')}
-            </Text>
+          <View style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.shadow }]}> 
+            <Text style={[styles.label, { color: colors.text }]}> {t('profile.manualGoal', 'Manual Daily Goal (kcal):')} </Text>
             <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: colors.inputBackground,
-                  borderColor: colors.inputBorder,
-                  color: colors.text,
-                },
-              ]}
+              style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
               value={manualGoal}
               onChangeText={onManualGoal}
               placeholder={t('profile.goalPlaceholder', 'e.g. 2000')}
@@ -279,20 +265,12 @@ export default function ProfileEditScreen() {
           </View>
         )}
 
-        {/* Advanced */}
         {mode === 'advanced' && (
           <>
-            <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Text style={[styles.label, { color: colors.text }]}>{t('profile.age', 'Age:')}</Text>
+            <View style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.shadow }]}> 
+              <Text style={[styles.label, { color: colors.text }]}> {t('profile.age', 'Age:')} </Text>
               <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: colors.inputBackground,
-                    borderColor: colors.inputBorder,
-                    color: colors.text,
-                  },
-                ]}
+                style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
                 value={age}
                 onChangeText={(v) => {
                   const n = v.replace(/[^0-9]/g, '');
@@ -316,16 +294,9 @@ export default function ProfileEditScreen() {
                 placeholder={t('common.select', 'Select...')}
               />
 
-              <Text style={[styles.label, { color: colors.text }]}>{t('profile.height', 'Height (cm):')}</Text>
+              <Text style={[styles.label, { color: colors.text }]}> {t('profile.height', 'Height (cm):')} </Text>
               <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: colors.inputBackground,
-                    borderColor: colors.inputBorder,
-                    color: colors.text,
-                  },
-                ]}
+                style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
                 value={height}
                 onChangeText={(v) => {
                   const n = v.replace(/[^0-9]/g, '');
@@ -338,16 +309,9 @@ export default function ProfileEditScreen() {
                 maxLength={3}
               />
 
-              <Text style={[styles.label, { color: colors.text }]}>{t('profile.weight', 'Weight (kg):')}</Text>
+              <Text style={[styles.label, { color: colors.text }]}> {t('profile.weight', 'Weight (kg):')} </Text>
               <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: colors.inputBackground,
-                    borderColor: colors.inputBorder,
-                    color: colors.text,
-                  },
-                ]}
+                style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
                 value={weight}
                 onChangeText={(v) => {
                   const n = v.replace(/[^0-9.]/g, '');
@@ -382,14 +346,12 @@ export default function ProfileEditScreen() {
               />
             </View>
 
-            <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border, alignItems: 'center' }]}>
-              <Text style={[styles.label, { color: colors.text }]}>
-                {t('profile.calculatedGoal', 'Calculated Goal:')}
-              </Text>
-              <Text style={[styles.calculatedValue, { color: colors.primary }]}>
+            <View style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.shadow, alignItems: 'center' }]}> 
+              <Text style={[styles.label, { color: colors.text }]}> {t('profile.calculatedGoal', 'Calculated Goal:')} </Text>
+              <Text style={[styles.calculatedValue, { color: colors.primary }]}> 
                 {calculatedGoal != null
                   ? `${calculatedGoal} kcal`
-                  : t('profile.incomplete', 'Enter details above')}
+                  : t('profile.incomplete', 'Enter details above')} 
               </Text>
             </View>
           </>
@@ -405,35 +367,44 @@ const styles = StyleSheet.create({
   loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   modeToggle: {
     flexDirection: 'row',
-    borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 20,
+    marginBottom: 24,
     overflow: 'hidden',
-    marginBottom: 24,
-  },
-  modeBtn: { flex: 1, paddingVertical: 12, alignItems: 'center' },
-  modeBtnActive: {},
-  modeText: { fontSize: 16, fontWeight: '500' },
-  modeTextActive: { color: '#fff', fontWeight: 'bold' },
-
-  section: {
-    marginBottom: 24,
-    padding: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    elevation: 2,
-    shadowColor: '#000',
+    elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 2,
+    shadowRadius: 4,
   },
-  label: { fontSize: 16, marginBottom: 8, fontWeight: '500' },
+  modeBtn: {
+    flex: 1,
+    paddingVertical: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  modeText: { fontSize: 16, fontWeight: '500', color: '#666' },
+  modeTextActive: { color: '#fff' },
+  card: {
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+  },
+  label: { fontSize: 14, marginBottom: 8, fontWeight: '500' },
   input: {
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingVertical: Platform.OS === 'ios' ? 12 : 8,
+    borderRadius: 12,
+    borderWidth: 0,
+    paddingHorizontal: 16,
+    paddingVertical: Platform.OS === 'ios' ? 14 : 12,
     fontSize: 16,
     marginBottom: 16,
+    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
   calculatedValue: { fontSize: 20, fontWeight: 'bold', marginTop: 8 },
 });

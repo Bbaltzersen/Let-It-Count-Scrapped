@@ -1,7 +1,11 @@
 // src/constants/colors.ts
 
+import { ColorValue } from "react-native";
+
 // Define the structure of our theme colors
 export interface ThemeColors {
+    cardContrast: ColorValue | undefined;
+    shadow: ColorValue | undefined;
     background: string;
     card: string;
     text: string;
@@ -38,7 +42,9 @@ export interface ThemeColors {
     totalText: '#2c3e50',
     totalValue: '#34495e',
     icon: '#1f2937',
-    kcalHighlight: KcalGreen, // Use the defined green
+    kcalHighlight: KcalGreen,
+    shadow: '#000000',
+    cardContrast: undefined
   };
   
   // Dark Theme
@@ -57,6 +63,8 @@ export interface ThemeColors {
     totalText: '#aeaeb2',
     totalValue: '#f2f2f7',
     icon: '#f2f2f7',
-    kcalHighlight: KcalGreen, // Use the same defined green
+    kcalHighlight: KcalGreen,
+    shadow: '#000000',
+    cardContrast: undefined
   };
   

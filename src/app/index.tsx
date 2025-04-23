@@ -1,4 +1,3 @@
-// src/app/index.tsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   StyleSheet,
@@ -12,72 +11,139 @@ import {
   ActivityIndicator,
   Platform,
   TouchableOpacity,
+  LayoutAnimation,
+  UIManager,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useTranslation } from 'react-i18next';
 import { Entry } from 'types';
 import { calculateCalories } from 'utils/calorieUtils';
 import { addEntry, getEntriesForDay } from 'services/database';
-import { useTheme } from '../context/themeContext'; // Corrected import path
+import { useTheme } from '../context/themeContext';
+import { commonStyles } from '../styles/commonStyles';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 export default function HomeScreen() {
   const { t } = useTranslation();
   const { colors, isDarkMode } = useTheme();
 
-  // --- State, Data Fetching, Actions, Calculated Values --- (Keep as is)
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [kcalPer100g, setKcalPer100g] = useState('');
+  const [protein, setProtein] = useState('');
+  const [carbs, setCarbs] = useState('');
+  const [fat, setFat] = useState('');
+  const [saturatedFat, setSaturatedFat] = useState('');
+  const [sugars, setSugars] = useState('');
+  const [salt, setSalt] = useState('');
   const [entries, setEntries] = useState<Entry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showOptionalFields, setShowOptionalFields] = useState(false);
 
-  const loadEntries = useCallback(async () => { /* ... */ setIsLoading(true); try { const todayEntries = await getEntriesForDay(new Date()); setEntries(todayEntries); } catch (error) { console.error("Failed to load entries:", error); Alert.alert(t('error.title', 'Error'), t('error.loadEntries', 'Failed to load entries.')); } finally { setIsLoading(false); } }, [t]);
-  useEffect(() => { loadEntries(); }, []);
+  const loadEntries = useCallback(async () => {
+      setIsLoading(true);
+      try {
+          const todayEntries = await getEntriesForDay(new Date());
+          setEntries(todayEntries);
+      } catch (error) {
+          console.error("Failed to load entries:", error);
+          Alert.alert(t('error.title'), t('error.loadEntries'));
+      } finally {
+          setIsLoading(false);
+      }
+  }, [t]);
 
-  const handleAddEntry = async () => { /* ... */ const amountNum = parseInt(amount, 10); const kcalNum = parseInt(kcalPer100g, 10); if (!name.trim() || isNaN(amountNum) || amountNum <= 0 || isNaN(kcalNum) || kcalNum < 0) { Alert.alert( t('error.invalidInputTitle', "Invalid Input"), t('error.invalidInputMsg', "Please fill in all fields correctly (amount and kcal must be positive numbers).") ); return; } Keyboard.dismiss(); try { await addEntry(name, amountNum, kcalNum); Alert.alert(t('common.success', 'Success'), t('entry.addedSuccess', 'Entry added!')); setName(''); setAmount(''); setKcalPer100g(''); await loadEntries(); } catch (error) { console.error("Failed to add entry:", error); Alert.alert(t('error.title', 'Error'), t('error.addEntry', 'Failed to add entry.')); } };
+  useEffect(() => {
+      loadEntries();
+  }, [loadEntries]);
+
+  const handleAddEntry = async () => {
+      const amountNum = parseInt(amount, 10);
+      const kcalNum = parseInt(kcalPer100g, 10);
+      if (!name.trim() || isNaN(amountNum) || amountNum <= 0 || isNaN(kcalNum) || kcalNum < 0) {
+          Alert.alert(t('error.invalidInputTitle'), t('error.invalidInputMsg'));
+          return;
+      }
+      const parseOptional = (value: string): number => {
+          const parsed = parseFloat(value.replace(',', '.'));
+          return isNaN(parsed) || parsed < 0 ? 0 : parsed;
+      };
+      const proteinNum = parseOptional(protein);
+      const carbsNum = parseOptional(carbs);
+      const fatNum = parseOptional(fat);
+      const saturatedFatNum = parseOptional(saturatedFat);
+      const sugarsNum = parseOptional(sugars);
+      const saltNum = parseOptional(salt);
+
+      Keyboard.dismiss();
+      try {
+          await addEntry(name, amountNum, kcalNum, proteinNum, carbsNum, fatNum, saturatedFatNum, sugarsNum, saltNum);
+          Alert.alert(t('common.success'), t('entry.addedSuccess'));
+          setName(''); setAmount(''); setKcalPer100g('');
+          setProtein(''); setCarbs(''); setFat('');
+          setSaturatedFat(''); setSugars(''); setSalt('');
+          setShowOptionalFields(false);
+          await loadEntries();
+      } catch (error) {
+          console.error("Failed to add entry:", error);
+          Alert.alert(t('error.title'), t('error.addEntry'));
+      }
+  };
+
+  const toggleOptionalFields = () => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setShowOptionalFields(!showOptionalFields);
+  };
+
   const totalCaloriesToday = useMemo(() => entries.reduce((sum, entry) => sum + calculateCalories(entry), 0), [entries]);
 
-  // --- Rendering ---
   const renderEntry = ({ item }: { item: Entry }) => (
-    // Apply theme colors to list item
-    <View style={[styles.entryItem, { backgroundColor: colors.card, borderColor: colors.border }]}>
-      <View style={styles.entryRow}>
-        <Text style={[styles.entryName, { color: colors.text }]}>{item.name}</Text>
-        <Text style={[styles.entryCalculatedKcal, { color: colors.kcalHighlight }]}>
-            ~ {calculateCalories(item)} kcal
+    <View style={[commonStyles.entryItemContainer, commonStyles.cardLook, styles.entryItemSpecific, { backgroundColor: colors.card, borderColor: colors.border, shadowColor: colors.shadow }]}>
+      <View style={commonStyles.entryRow}>
+        <Text style={[commonStyles.entryName, { color: colors.text }]}>{item.name}</Text>
+        <Text style={[commonStyles.entryCalculatedKcal, { color: colors.kcalHighlight }]}>
+           ~ {calculateCalories(item)} kcal
         </Text>
       </View>
-      <View style={styles.entryRow}>
-        <Text style={[styles.entryDetails, { color: colors.textSecondary }]}>{item.amount_in_g}g ({item.calories_per_100_g} kcal/100g)</Text>
-        <Text style={[styles.entryTimestamp, { color: colors.textSecondary }]}>{new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+      <View style={commonStyles.entryRow}>
+        <Text style={[commonStyles.entryDetails, { color: colors.textSecondary }]}>
+            {item.amount_in_g}g ({item.calories_per_100_g} kcal/100g)
+        </Text>
+        <Text style={[commonStyles.entryTimestamp, { color: colors.textSecondary }]}>
+            {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </Text>
       </View>
+      {(item.protein_per_100_g > 0 || item.carbs_per_100_g > 0 || item.fat_per_100_g > 0) && (
+        <View style={[commonStyles.macroRow, { borderColor: colors.border }]}>
+            <Text style={[commonStyles.macroText, { color: colors.textSecondary }]}>
+                P: {item.protein_per_100_g}g | C: {item.carbs_per_100_g}g | F: {item.fat_per_100_g}g
+            </Text>
+        </View>
+      )}
     </View>
   );
 
-  // --- Component Return ---
   return (
-    // Add horizontal padding to SafeAreaView to prevent content touching edges
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-
-      {/* --- Form Section Wrapper --- */}
+    <SafeAreaView style={[commonStyles.container, { backgroundColor: colors.background }]}>
       <View style={styles.formSectionContainer}>
-        {/* Title moved outside the card */}
-        <Text style={[styles.formTitle, { color: colors.text }]}>{t('entry.addTitle', 'Add New Entry')}</Text>
+        <Text style={[commonStyles.formTitle, { color: colors.text }]}>{t('entry.addTitle')}</Text>
 
-        {/* Input Form Card */}
-        <View style={[styles.formCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <View style={[commonStyles.cardLook, { backgroundColor: colors.card, borderColor: colors.border, shadowColor: colors.shadow }]}>
           <TextInput
-            style={[ styles.input, { color: colors.inputText, backgroundColor: colors.inputBackground, borderColor: colors.inputBorder } ]}
-            placeholder={t('entry.namePlaceholder', 'Food Name')}
+            style={[ commonStyles.inputBase, { color: colors.inputText, backgroundColor: colors.inputBackground, borderColor: colors.inputBorder } ]}
+            placeholder={t('entry.namePlaceholder')}
             placeholderTextColor={colors.textSecondary}
             value={name}
             onChangeText={setName}
             returnKeyType="next"
           />
-          <View style={styles.row}>
+          <View style={commonStyles.row}>
             <TextInput
-              style={[ styles.input, styles.inputSmall, { color: colors.inputText, backgroundColor: colors.inputBackground, borderColor: colors.inputBorder } ]}
-              placeholder={t('entry.amountPlaceholder', 'Amount (g)')}
+              style={[ commonStyles.inputBase, commonStyles.inputSmall, { color: colors.inputText, backgroundColor: colors.inputBackground, borderColor: colors.inputBorder } ]}
+              placeholder={t('entry.amountPlaceholder')}
               placeholderTextColor={colors.textSecondary}
               value={amount}
               onChangeText={setAmount}
@@ -85,56 +151,84 @@ export default function HomeScreen() {
               returnKeyType="next"
             />
             <TextInput
-              style={[ styles.input, styles.inputSmall, { color: colors.inputText, backgroundColor: colors.inputBackground, borderColor: colors.inputBorder } ]}
-              placeholder={t('entry.kcalPlaceholder', 'kcal/100g')}
+              style={[ commonStyles.inputBase, commonStyles.inputSmall, { color: colors.inputText, backgroundColor: colors.inputBackground, borderColor: colors.inputBorder } ]}
+              placeholder={t('entry.kcalPlaceholder')}
               placeholderTextColor={colors.textSecondary}
               value={kcalPer100g}
               onChangeText={setKcalPer100g}
               keyboardType="numeric"
-              returnKeyType="done"
-              onSubmitEditing={handleAddEntry}
+              returnKeyType="next"
             />
           </View>
+
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: colors.primary }]}
+            style={[commonStyles.toggleButton, { borderColor: colors.border }]}
+            onPress={toggleOptionalFields}
+            activeOpacity={0.6}
+          >
+            <Text style={[commonStyles.toggleButtonText, { color: colors.primary }]}>
+              {showOptionalFields ? t('entry.hideOptional') : t('entry.showOptional')}
+            </Text>
+          </TouchableOpacity>
+
+          {showOptionalFields && (
+            <View>
+              <View style={commonStyles.row}>
+                 <TextInput style={[ commonStyles.inputBase, commonStyles.inputSmall, { color: colors.inputText, backgroundColor: colors.inputBackground, borderColor: colors.inputBorder } ]}
+                    placeholder={t('entry.fatPlaceholder')}
+                    placeholderTextColor={colors.textSecondary} value={fat} onChangeText={setFat} keyboardType="numeric" returnKeyType="next" />
+                 <TextInput style={[ commonStyles.inputBase, commonStyles.inputSmall, { color: colors.inputText, backgroundColor: colors.inputBackground, borderColor: colors.inputBorder } ]}
+                    placeholder={t('entry.saturatedFatPlaceholder')}
+                    placeholderTextColor={colors.textSecondary} value={saturatedFat} onChangeText={setSaturatedFat} keyboardType="numeric" returnKeyType="next" />
+              </View>
+               <View style={commonStyles.row}>
+                 <TextInput style={[ commonStyles.inputBase, commonStyles.inputSmall, { color: colors.inputText, backgroundColor: colors.inputBackground, borderColor: colors.inputBorder } ]}
+                    placeholder={t('entry.carbsPlaceholder')}
+                    placeholderTextColor={colors.textSecondary} value={carbs} onChangeText={setCarbs} keyboardType="numeric" returnKeyType="next" />
+                 <TextInput style={[ commonStyles.inputBase, commonStyles.inputSmall, { color: colors.inputText, backgroundColor: colors.inputBackground, borderColor: colors.inputBorder } ]}
+                    placeholder={t('entry.sugarsPlaceholder')}
+                    placeholderTextColor={colors.textSecondary} value={sugars} onChangeText={setSugars} keyboardType="numeric" returnKeyType="next" />
+              </View>
+               <View style={commonStyles.row}>
+                 <TextInput style={[ commonStyles.inputBase, commonStyles.inputSmall, { color: colors.inputText, backgroundColor: colors.inputBackground, borderColor: colors.inputBorder } ]}
+                    placeholder={t('entry.proteinPlaceholder')}
+                    placeholderTextColor={colors.textSecondary} value={protein} onChangeText={setProtein} keyboardType="numeric" returnKeyType="next" />
+                 <TextInput style={[ commonStyles.inputBase, commonStyles.inputSmall, { color: colors.inputText, backgroundColor: colors.inputBackground, borderColor: colors.inputBorder } ]}
+                    placeholder={t('entry.saltPlaceholder')}
+                    placeholderTextColor={colors.textSecondary} value={salt} onChangeText={setSalt} keyboardType="numeric" returnKeyType="done" onSubmitEditing={handleAddEntry} />
+              </View>
+            </View>
+          )}
+
+          <TouchableOpacity
+            style={[commonStyles.buttonBase, { backgroundColor: colors.primary }]}
             onPress={handleAddEntry}
             activeOpacity={0.7}
           >
-            <Text style={styles.buttonText}>{t('entry.addButton', 'Add Entry')}</Text>
+            <Text style={commonStyles.buttonText}>{t('entry.addButton')}</Text>
           </TouchableOpacity>
         </View>
       </View>
-      {/* ------------------------------- */}
 
-
-      {/* Total Display */}
-      {/* Apply card styles and theme colors */}
-      {/* Removed inline marginHorizontal */}
-      <View style={[styles.totalContainer, styles.cardLook, { backgroundColor: colors.card, borderColor: colors.border }]}>
-         <Text style={[styles.totalLabel, { color: colors.text }]}>{t('entry.totalToday', 'Total Today:')}</Text>
+      <View style={[commonStyles.cardLook, styles.totalContainer, { backgroundColor: colors.card, borderColor: colors.border, shadowColor: colors.shadow }]}>
+         <Text style={[styles.totalLabel, { color: colors.text }]}>{t('entry.totalToday')}</Text>
          <Text style={[styles.totalValue, { color: colors.primary }]}>{totalCaloriesToday} kcal</Text>
        </View>
 
-      {/* Entries List */}
-      {/* List already has horizontal padding via contentContainerStyle */}
       <FlatList
         style={styles.list}
         data={entries}
         renderItem={renderEntry}
         keyExtractor={(item) => item.id.toString()}
-        ListHeaderComponent={<Text style={[styles.listTitle, { color: colors.text }]}>{t('entry.todayTitle', "Today's Entries")}</Text>}
+        ListHeaderComponent={<Text style={[commonStyles.listTitle, { color: colors.text }]}>{t('entry.todayTitle')}</Text>}
         ListEmptyComponent={
             isLoading ? (
-              <View style={styles.emptyList}>
-                <ActivityIndicator color={colors.primary} />
-              </View>
+              <View style={commonStyles.centerContent}><ActivityIndicator color={colors.primary} /></View>
             ) : (
-              <View style={styles.emptyList}>
-                <Text style={{ color: colors.textSecondary }}>{t('entry.noEntries', 'No entries yet for today.')}</Text>
-              </View>
+              <View style={commonStyles.centerContent}><Text style={[commonStyles.emptyListText, { color: colors.textSecondary }]}>{t('entry.noEntries')}</Text></View>
             )
         }
-        contentContainerStyle={styles.listContentContainer}
+        contentContainerStyle={commonStyles.listContentContainer}
       />
 
       <StatusBar style={isDarkMode ? 'light' : 'dark'} />
@@ -142,78 +236,17 @@ export default function HomeScreen() {
   );
 }
 
-// --- Styles ---
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 10,
-  },
   formSectionContainer: {
-      marginTop: 10,
-      marginBottom: 10,
-  },
-  formTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    marginLeft: 10, // Align with card padding
-    // textAlign: 'center', // Removed centering
-  },
-  // Common styles for card-like appearance
-  cardLook: {
-    padding: 15,
-    borderRadius: 8,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1.5,
-    elevation: 2,
-  },
-  formCard: {
-    // Inherit card look
-    // Specific padding/margins handled here if different from other cards
-  },
-  row: {
-    flexDirection: 'row',
-  },
-  input: {
-    borderWidth: 1,
-    paddingVertical: Platform.OS === 'ios' ? 12 : 8,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-    fontSize: 16,
-  },
-  inputSmall: {
-    flex: 1,
-    marginRight: 5,
-  },
-  button: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginTop: 10,
-    minHeight: 44,
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    marginBottom: 10,
   },
   totalContainer: {
-    // Inherit card look
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 8,
-    marginBottom: 8, // Increased space below total
-    // Removed inline marginHorizontal
-    // paddingVertical adjusted via cardLook padding
-    // paddingHorizontal adjusted via cardLook padding
-    // borderRadius, borderWidth, shadow applied via cardLook
+    marginBottom: 15,
   },
   totalLabel: {
     fontSize: 16,
@@ -226,53 +259,7 @@ const styles = StyleSheet.create({
   list: {
     flex: 1,
   },
-  listContentContainer: {
-    paddingBottom: 20,
-  },
-  listTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 10,
-    marginBottom: 10,
-    marginLeft: 10, // Align with card padding
-  },
-  emptyList: {
-    marginTop: 30,
-    alignItems: 'center',
-    padding: 20,
-  },
-  entryItem: {
-    // Inherit card look
-    padding: 15, // Keep padding specific to entry item if needed
-    marginBottom: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1.5,
-    elevation: 1, // Slightly less elevation than form/total
-  },
-  entryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 5,
-  },
-  entryName: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    flex: 1,
-    marginRight: 10,
-  },
-  entryCalculatedKcal: {
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  entryDetails: {
-    fontSize: 14,
-  },
-  entryTimestamp: {
-    fontSize: 12,
+  entryItemSpecific: {
+    elevation: 1,
   }
 });
