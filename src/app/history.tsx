@@ -151,7 +151,7 @@ export default function HistoryScreen() {
 
 const styles = StyleSheet.create({
   dayContainer: {
-    marginBottom: 10,
+    marginTop: 10,
     overflow: 'hidden',
     elevation: 1,
   },

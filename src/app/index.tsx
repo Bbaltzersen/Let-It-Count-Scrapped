@@ -16,15 +16,49 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useTranslation } from 'react-i18next';
+import { useFocusEffect } from 'expo-router'; // Import useFocusEffect
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 import { Entry } from 'types';
 import { calculateCalories } from 'utils/calorieUtils';
 import { addEntry, getEntriesForDay } from 'services/database';
 import { useTheme } from '../context/themeContext';
 import { commonStyles } from '../styles/commonStyles';
 
+// Constants for keys (ensure these match profile screen)
+const ACTIVE_GOAL_TYPE_KEY = 'profileActiveGoalType';
+const MANUAL_GOAL_KEY = 'profileManualGoal';
+const CALCULATED_GOAL_KEY = 'profileCalculatedGoal';
+const DEFAULT_GOAL = 2000; // Default goal
+
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
+
+// Helper function to determine the color based on progress
+const getGoalProgressColor = (current: number, target: number, colors: any): string => {
+    if (target <= 0) return colors.text; // Avoid division by zero or invalid target
+
+    const percentage = (current / target) * 100;
+
+    // Define color thresholds (adjust as needed)
+    const underThreshold = 90; // Below 90% = Green (or primary)
+    const overThreshold = 110; // Above 110% = Red (Danger)
+                               // Between 90% and 110% = Yellow/Orange (Warning)
+
+    // Define fallback colors if theme doesn't provide them
+    const successColor = colors.success || '#4CAF50'; // Green
+    const warningColor = colors.warning || '#FF9800'; // Orange
+    const dangerColor = colors.danger || '#F44336';   // Red
+
+    if (percentage < underThreshold) {
+        return successColor;
+    } else if (percentage <= overThreshold) {
+        return warningColor;
+    } else {
+        return dangerColor;
+    }
+};
+
 
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -40,11 +74,13 @@ export default function HomeScreen() {
   const [sugars, setSugars] = useState('');
   const [salt, setSalt] = useState('');
   const [entries, setEntries] = useState<Entry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingEntries, setIsLoadingEntries] = useState(true);
+  const [isLoadingGoal, setIsLoadingGoal] = useState(true); // Separate loading for goal
   const [showOptionalFields, setShowOptionalFields] = useState(false);
+  const [targetCalories, setTargetCalories] = useState<number>(DEFAULT_GOAL); // State for target goal
 
   const loadEntries = useCallback(async () => {
-      setIsLoading(true);
+      setIsLoadingEntries(true);
       try {
           const todayEntries = await getEntriesForDay(new Date());
           setEntries(todayEntries);
@@ -52,13 +88,48 @@ export default function HomeScreen() {
           console.error("Failed to load entries:", error);
           Alert.alert(t('error.title'), t('error.loadEntries'));
       } finally {
-          setIsLoading(false);
+          setIsLoadingEntries(false);
       }
   }, [t]);
 
-  useEffect(() => {
-      loadEntries();
-  }, [loadEntries]);
+  // Load target goal when screen focuses
+  useFocusEffect(
+    useCallback(() => {
+      const loadTargetGoal = async () => {
+        setIsLoadingGoal(true);
+        try {
+            const type = await AsyncStorage.getItem(ACTIVE_GOAL_TYPE_KEY);
+            let goalValue: string | null = null;
+            const currentGoalType = type === 'calculated' ? 'calculated' : 'simple';
+
+            if (currentGoalType === 'calculated') {
+                goalValue = await AsyncStorage.getItem(CALCULATED_GOAL_KEY);
+            } else {
+                goalValue = await AsyncStorage.getItem(MANUAL_GOAL_KEY);
+            }
+
+            let goalNum = DEFAULT_GOAL;
+            if (goalValue !== null) {
+                const parsedGoal = parseInt(goalValue, 10);
+                if (!isNaN(parsedGoal) && parsedGoal > 0) {
+                    goalNum = parsedGoal;
+                }
+            }
+            setTargetCalories(goalNum);
+
+        } catch (e) {
+            console.error("Failed to load target goal", e);
+            setTargetCalories(DEFAULT_GOAL); // Fallback on error
+        } finally {
+            setIsLoadingGoal(false);
+        }
+      };
+
+      loadTargetGoal();
+      loadEntries(); // Also load entries on focus
+    }, [loadEntries]) // Include loadEntries dependency
+  );
+
 
   const handleAddEntry = async () => {
       const amountNum = parseInt(amount, 10);
@@ -86,7 +157,7 @@ export default function HomeScreen() {
           setProtein(''); setCarbs(''); setFat('');
           setSaturatedFat(''); setSugars(''); setSalt('');
           setShowOptionalFields(false);
-          await loadEntries();
+          await loadEntries(); // Reload entries after adding
       } catch (error) {
           console.error("Failed to add entry:", error);
           Alert.alert(t('error.title'), t('error.addEntry'));
@@ -99,6 +170,12 @@ export default function HomeScreen() {
   };
 
   const totalCaloriesToday = useMemo(() => entries.reduce((sum, entry) => sum + calculateCalories(entry), 0), [entries]);
+
+  // Calculate the dynamic color for the total value
+  const totalValueColor = useMemo(() => {
+      if (isLoadingGoal) return colors.textSecondary; // Use a neutral color while loading goal
+      return getGoalProgressColor(totalCaloriesToday, targetCalories, colors);
+  }, [totalCaloriesToday, targetCalories, colors, isLoadingGoal]);
 
   const renderEntry = ({ item }: { item: Entry }) => (
     <View style={[commonStyles.entryItemContainer, commonStyles.cardLook, styles.entryItemSpecific, { backgroundColor: colors.card, borderColor: colors.border, shadowColor: colors.shadow }]}>
@@ -212,7 +289,10 @@ export default function HomeScreen() {
 
       <View style={[commonStyles.cardLook, styles.totalContainer, { backgroundColor: colors.card, borderColor: colors.border, shadowColor: colors.shadow }]}>
          <Text style={[styles.totalLabel, { color: colors.text }]}>{t('entry.totalToday')}</Text>
-         <Text style={[styles.totalValue, { color: colors.primary }]}>{totalCaloriesToday} kcal</Text>
+         {/* Apply the dynamic color */}
+         <Text style={[styles.totalValue, { color: totalValueColor }]}>
+            {totalCaloriesToday} kcal
+         </Text>
        </View>
 
       <FlatList
@@ -222,7 +302,7 @@ export default function HomeScreen() {
         keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={<Text style={[commonStyles.listTitle, { color: colors.text }]}>{t('entry.todayTitle')}</Text>}
         ListEmptyComponent={
-            isLoading ? (
+            isLoadingEntries ? ( // Check entries loading state
               <View style={commonStyles.centerContent}><ActivityIndicator color={colors.primary} /></View>
             ) : (
               <View style={commonStyles.centerContent}><Text style={[commonStyles.emptyListText, { color: colors.textSecondary }]}>{t('entry.noEntries')}</Text></View>

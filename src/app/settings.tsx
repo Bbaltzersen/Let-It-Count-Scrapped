@@ -47,7 +47,7 @@ export default function SettingsScreen() {
 
       <View style={[commonStyles.section, { backgroundColor: colors.card, borderColor: colors.border, shadowColor: colors.shadow }]}>
         <CustomPicker
-          labelStyle={[commonStyles.label, { color: colors.text }]}
+          // Removed labelStyle prop - CustomPicker styles its own label
           label={t('settings.selectLanguage')}
           options={languageOptions}
           selectedValue={currentLanguage}
@@ -57,6 +57,7 @@ export default function SettingsScreen() {
 
       <View style={[commonStyles.section, { backgroundColor: colors.card, borderColor: colors.border, shadowColor: colors.shadow }]}>
           <View style={styles.toggleRow}>
+            {/* Note: commonStyles.label is used here, combined with local toggleLabel style */}
             <Text style={[commonStyles.label, styles.toggleLabel, { color: colors.text }]}>
               {t('settings.enableDarkMode')}
             </Text>
@@ -90,6 +91,6 @@ const styles = StyleSheet.create({
   toggleLabel: {
       flex: 1,
       marginRight: 10,
-      marginBottom: 0,
+      marginBottom: 0, // Override marginBottom from commonStyles.label
   }
 });

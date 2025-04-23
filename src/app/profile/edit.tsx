@@ -16,6 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/themeContext';
 import { CustomPicker, PickerOption } from '../../components/customPicker';
 import { ScrollableValuePicker } from '../../components/scrollableValuePicker';
+import { commonStyles } from '../../styles/commonStyles'; // Import common styles
 
 const PROFILE_MODE_KEY = 'profileMode';
 const MANUAL_GOAL_KEY = 'profileManualGoal';
@@ -47,6 +48,7 @@ export default function ProfileEditScreen() {
   const [calculatedGoal, setCalculatedGoal] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Load saved profile data
   useEffect(() => {
     (async () => {
       setIsLoading(true);
@@ -87,15 +89,11 @@ export default function ProfileEditScreen() {
         }
         const wk = parseFloat(savedWeightGoalStr ?? '0');
         setWeightGoalValue(isNaN(wk) ? 0 : wk);
-
         const cg = parseInt(savedCalculatedStr ?? '', 10);
         if (!isNaN(cg)) setCalculatedGoal(cg);
       } catch (err) {
         console.error(err);
-        Alert.alert(
-          t('error.title', 'Error'),
-          t('profile.loadError', 'Failed to load profile data.')
-        );
+        Alert.alert(t('error.title'), t('profile.loadError'));
       } finally {
         setIsLoading(false);
       }
@@ -112,29 +110,24 @@ export default function ProfileEditScreen() {
         }
       } catch (err) {
         console.error(err);
-        Alert.alert(
-          t('error.title', 'Error'),
-          t('profile.saveError', 'Failed to save setting.')
-        );
+        Alert.alert(t('error.title'), t('profile.saveError'));
       }
     },
     [t]
   );
 
+  // Recalculate TDEE when advanced fields change
   useEffect(() => {
     if (mode !== 'advanced') return;
-
     const a = parseInt(age, 10);
     const h = parseInt(height, 10);
     const w = parseFloat(weight);
     const delta = weightGoalValue;
-    
     if (!isNaN(a) && sex && !isNaN(h) && !isNaN(w) && activityLevel) {
       const bmr =
         sex === 'male'
           ? 88.362 + 13.397 * w + 4.799 * h - 5.677 * a
           : 447.593 + 9.247 * w + 3.098 * h - 4.330 * a;
-
       const activityFactor =
         activityLevel === 'light'
           ? 1.375
@@ -143,11 +136,9 @@ export default function ProfileEditScreen() {
           : activityLevel === 'very'
           ? 1.725
           : 1.2;
-
       const tdee = bmr * activityFactor;
       const adj = (delta * 7700) / 7;
       const total = Math.round(tdee + adj);
-
       if (total > 0) {
         setCalculatedGoal(total);
         saveData(CALCULATED_GOAL_KEY, total);
@@ -165,17 +156,16 @@ export default function ProfileEditScreen() {
   const onModeChange = (m: ProfileMode) => {
     setMode(m);
     saveData(PROFILE_MODE_KEY, m);
-    saveData(
-      ACTIVE_GOAL_TYPE_KEY,
-      m === 'simple' ? 'manual' : 'calculated'
-    );
+    saveData(ACTIVE_GOAL_TYPE_KEY, m === 'simple' ? 'manual' : 'calculated');
   };
+
   const onManualGoal = (text: string) => {
     const numOnly = text.replace(/[^0-9]/g, '');
     setManualGoal(numOnly);
     saveData(MANUAL_GOAL_KEY, numOnly);
     if (mode === 'simple') saveData(ACTIVE_GOAL_TYPE_KEY, 'manual');
   };
+
   const onWeightGoal = (val: number) => {
     setWeightGoalValue(val);
     saveData(WEIGHT_GOAL_KEY, val);
@@ -183,82 +173,117 @@ export default function ProfileEditScreen() {
 
   const sexOptions: PickerOption<Sex>[] = useMemo(
     () => [
-      { label: t('profile.sexMale', 'Male'), value: 'male' },
-      { label: t('profile.sexFemale', 'Female'), value: 'female' },
+      { label: t('profile.sexMale'), value: 'male' },
+      { label: t('profile.sexFemale'), value: 'female' },
     ],
     [t]
   );
+
   const activityOptions: PickerOption<ActivityLevel>[] = useMemo(
     () => [
-      { label: t('profile.activitySedentary', 'Sedentary'), value: 'sedentary' },
-      { label: t('profile.activityLight', 'Lightly Active'), value: 'light' },
-      { label: t('profile.activityModerate', 'Moderately Active'), value: 'moderate' },
-      { label: t('profile.activityVery', 'Very Active'), value: 'very' },
+      { label: t('profile.activitySedentary'), value: 'sedentary' },
+      { label: t('profile.activityLight'), value: 'light' },
+      { label: t('profile.activityModerate'), value: 'moderate' },
+      { label: t('profile.activityVery'), value: 'very' },
     ],
     [t]
   );
 
   if (isLoading) {
     return (
-      <View style={[styles.loading, { backgroundColor: colors.background }]}> 
+      <View style={[commonStyles.centerContent, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={{ marginTop: 12, color: colors.text }}>
-          {t('common.loading', 'Loading...')}
+        <Text
+          style={[
+            commonStyles.secondaryText,
+            { marginTop: 12, color: colors.textSecondary },
+          ]}
+        >
+          {t('common.loading')}
         </Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}> 
+    <SafeAreaView style={[commonStyles.safeArea, { backgroundColor: colors.background }]}>
       <ScrollView
-        contentContainerStyle={styles.container}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: 20 }}
         keyboardShouldPersistTaps="handled"
+        nestedScrollEnabled={Platform.OS === 'android'}
       >
-        <View style={[styles.modeToggle, { backgroundColor: colors.card, shadowColor: colors.shadow }]}> 
+        <View
+          style={[
+            styles.modeToggle,
+            { backgroundColor: colors.card, shadowColor: colors.shadow },
+          ]}
+        >
           <TouchableOpacity
             style={[
               styles.modeBtn,
-              mode === 'simple' && { backgroundColor: colors.primary }
+              mode === 'simple' && { backgroundColor: colors.primary },
             ]}
             onPress={() => onModeChange('simple')}
           >
             <Text
               style={[
                 styles.modeText,
-                mode === 'simple' && styles.modeTextActive,
+                mode === 'simple'
+                  ? styles.modeTextActive
+                  : { color: colors.textSecondary },
               ]}
             >
-              {t('profile.simpleMode', 'Simple')}
+              {t('profile.simpleMode')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[
               styles.modeBtn,
-              mode === 'advanced' && { backgroundColor: colors.primary }
+              mode === 'advanced' && { backgroundColor: colors.primary },
             ]}
             onPress={() => onModeChange('advanced')}
           >
             <Text
               style={[
                 styles.modeText,
-                mode === 'advanced' && styles.modeTextActive,
+                mode === 'advanced'
+                  ? styles.modeTextActive
+                  : { color: colors.textSecondary },
               ]}
             >
-              {t('profile.advancedMode', 'Advanced')}
+              {t('profile.advancedMode')}
             </Text>
           </TouchableOpacity>
         </View>
 
         {mode === 'simple' && (
-          <View style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.shadow }]}> 
-            <Text style={[styles.label, { color: colors.text }]}> {t('profile.manualGoal', 'Manual Daily Goal (kcal):')} </Text>
+          <View
+            style={[
+              commonStyles.section,
+              {
+                backgroundColor: colors.card,
+                borderColor: colors.border,
+                shadowColor: colors.shadow,
+              },
+            ]}
+          >
+            <Text style={[commonStyles.label, { color: colors.text }]}>
+              {t('profile.manualGoal')}
+            </Text>
             <TextInput
-              style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+              style={[
+                commonStyles.inputBase,
+                {
+                  backgroundColor: colors.inputBackground,
+                  color: colors.text,
+                  borderColor: colors.inputBorder,
+                },
+              ]}
               value={manualGoal}
               onChangeText={onManualGoal}
-              placeholder={t('profile.goalPlaceholder', 'e.g. 2000')}
-              placeholderTextColor={colors.text}
+              placeholder={t('profile.goalPlaceholder')}
+              placeholderTextColor={colors.textSecondary}
               keyboardType="numeric"
               returnKeyType="done"
             />
@@ -267,76 +292,112 @@ export default function ProfileEditScreen() {
 
         {mode === 'advanced' && (
           <>
-            <View style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.shadow }]}> 
-              <Text style={[styles.label, { color: colors.text }]}> {t('profile.age', 'Age:')} </Text>
+            <View
+              style={[
+                commonStyles.section,
+                {
+                  backgroundColor: colors.card,
+                  borderColor: colors.border,
+                  shadowColor: colors.shadow,
+                },
+              ]}
+            >
+              <Text style={[commonStyles.label, { color: colors.text }]}>
+                {t('profile.age')}
+              </Text>
               <TextInput
-                style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                style={[
+                  commonStyles.inputBase,
+                  {
+                    backgroundColor: colors.inputBackground,
+                    color: colors.text,
+                    borderColor: colors.inputBorder,
+                  },
+                ]}
                 value={age}
                 onChangeText={(v) => {
                   const n = v.replace(/[^0-9]/g, '');
                   setAge(n);
                   saveData(AGE_KEY, n);
                 }}
-                placeholder={t('common.select', 'Select...')}
-                placeholderTextColor={colors.text}
+                placeholder={t('common.select')}
+                placeholderTextColor={colors.textSecondary}
                 keyboardType="numeric"
                 maxLength={3}
               />
 
               <CustomPicker<Sex>
-                label={t('profile.sex', 'Sex:')}
+                label={t('profile.sex')}
                 options={sexOptions}
                 selectedValue={sex}
                 onValueChange={(v) => {
                   setSex(v);
                   saveData(SEX_KEY, v);
                 }}
-                placeholder={t('common.select', 'Select...')}
+                placeholder={t('common.select')}
               />
 
-              <Text style={[styles.label, { color: colors.text }]}> {t('profile.height', 'Height (cm):')} </Text>
+              <Text style={[commonStyles.label, { color: colors.text }]}>
+                {t('profile.height')}
+              </Text>
               <TextInput
-                style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                style={[
+                  commonStyles.inputBase,
+                  {
+                    backgroundColor: colors.inputBackground,
+                    color: colors.text,
+                    borderColor: colors.inputBorder,
+                  },
+                ]}
                 value={height}
                 onChangeText={(v) => {
                   const n = v.replace(/[^0-9]/g, '');
                   setHeight(n);
                   saveData(HEIGHT_KEY, n);
                 }}
-                placeholder={t('common.select', 'Select...')}
-                placeholderTextColor={colors.text}
+                placeholder={t('common.select')}
+                placeholderTextColor={colors.textSecondary}
                 keyboardType="numeric"
                 maxLength={3}
               />
 
-              <Text style={[styles.label, { color: colors.text }]}> {t('profile.weight', 'Weight (kg):')} </Text>
+              <Text style={[commonStyles.label, { color: colors.text }]}>
+                {t('profile.weight')}
+              </Text>
               <TextInput
-                style={[styles.input, { backgroundColor: colors.inputBackground, color: colors.text }]}
+                style={[
+                  commonStyles.inputBase,
+                  {
+                    backgroundColor: colors.inputBackground,
+                    color: colors.text,
+                    borderColor: colors.inputBorder,
+                  },
+                ]}
                 value={weight}
                 onChangeText={(v) => {
                   const n = v.replace(/[^0-9.]/g, '');
                   setWeight(n);
                   saveData(WEIGHT_KEY, n);
                 }}
-                placeholder={t('common.select', 'Select...')}
-                placeholderTextColor={colors.text}
+                placeholder={t('common.select')}
+                placeholderTextColor={colors.textSecondary}
                 keyboardType="decimal-pad"
                 maxLength={5}
               />
 
               <CustomPicker<ActivityLevel>
-                label={t('profile.activityLevel', 'Activity Level:')}
+                label={t('profile.activityLevel')}
                 options={activityOptions}
                 selectedValue={activityLevel}
                 onValueChange={(v) => {
                   setActivityLevel(v);
                   saveData(ACTIVITY_LEVEL_KEY, v);
                 }}
-                placeholder={t('common.select', 'Select...')}
+                placeholder={t('common.select')}
               />
 
               <ScrollableValuePicker
-                label={t('profile.weightGoalNumerical', 'Weekly Weight Goal (kg):')}
+                label={t('profile.weightGoalNumerical')}
                 selectedValue={weightGoalValue}
                 onValueChange={onWeightGoal}
                 minValue={-2}
@@ -346,12 +407,24 @@ export default function ProfileEditScreen() {
               />
             </View>
 
-            <View style={[styles.card, { backgroundColor: colors.card, shadowColor: colors.shadow, alignItems: 'center' }]}> 
-              <Text style={[styles.label, { color: colors.text }]}> {t('profile.calculatedGoal', 'Calculated Goal:')} </Text>
-              <Text style={[styles.calculatedValue, { color: colors.primary }]}> 
+            <View
+              style={[
+                commonStyles.section,
+                {
+                  backgroundColor: colors.card,
+                  borderColor: colors.border,
+                  shadowColor: colors.shadow,
+                  alignItems: 'center',
+                },
+              ]}
+            >
+              <Text style={[commonStyles.label, { color: colors.text }]}>
+                {t('profile.calculatedGoal')}
+              </Text>
+              <Text style={[styles.calculatedValue, { color: colors.primary }]}>
                 {calculatedGoal != null
                   ? `${calculatedGoal} kcal`
-                  : t('profile.incomplete', 'Enter details above')} 
+                  : t('profile.incomplete')}
               </Text>
             </View>
           </>
@@ -362,9 +435,6 @@ export default function ProfileEditScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1 },
-  container: { flexGrow: 1, padding: 20 },
-  loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   modeToggle: {
     flexDirection: 'row',
     borderRadius: 20,
@@ -382,29 +452,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'transparent',
   },
-  modeText: { fontSize: 16, fontWeight: '500', color: '#666' },
-  modeTextActive: { color: '#fff' },
-  card: {
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
-    elevation: 3,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-  },
-  label: { fontSize: 14, marginBottom: 8, fontWeight: '500' },
-  input: {
-    borderRadius: 12,
-    borderWidth: 0,
-    paddingHorizontal: 16,
-    paddingVertical: Platform.OS === 'ios' ? 14 : 12,
+  modeText: {
     fontSize: 16,
-    marginBottom: 16,
-    elevation: 2,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    fontWeight: '500',
   },
-  calculatedValue: { fontSize: 20, fontWeight: 'bold', marginTop: 8 },
+  modeTextActive: {
+    color: '#fff',
+  },
+  calculatedValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 8,
+  },
 });
