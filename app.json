@@ -28,7 +28,8 @@
           "root": "./src/app"
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      "react-native-vision-camera"
     ],
     "experiments": {
       "typedRoutes": true
