@@ -400,9 +400,6 @@ export default function ProfileEditScreen() {
                 label={t('profile.weightGoalNumerical')}
                 selectedValue={weightGoalValue}
                 onValueChange={onWeightGoal}
-                minValue={-2}
-                maxValue={2}
-                step={0.25}
                 unit="kg/week"
               />
             </View>
